@@ -1,1 +1,505 @@
+<!DOCTYPE html>
 
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Registro de Entreno</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+background: #0f0f1a;
+font-family: ‘Courier New’, monospace;
+color: #f0f0f0;
+max-width: 480px;
+margin: 0 auto;
+min-height: 100vh;
+padding-bottom: 80px;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* HEADER */
+.header {
+background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+padding: 28px 20px 20px;
+border-bottom: 1px solid #ffffff18;
+position: sticky; top: 0; z-index: 10;
+}
+.header-label { font-size: 11px; color: #e94560; letter-spacing: 3px; margin-bottom: 6px; }
+.header-title { font-size: 24px; font-weight: bold; line-height: 1.2; }
+.header-sub { font-size: 12px; color: #888; margin-top: 6px; }
+
+.back-btn {
+background: none; border: none; color: #888;
+font-size: 13px; cursor: pointer; padding: 0;
+margin-bottom: 12px; font-family: inherit;
+display: flex; align-items: center; gap: 4px;
+}
+
+/* DAY CARDS */
+.day-card {
+width: 100%; background: #1a1a2e;
+border-radius: 12px; padding: 20px;
+margin-bottom: 12px; display: flex;
+align-items: center; gap: 16px;
+cursor: pointer; border: 1px solid #ffffff10;
+text-align: left; font-family: inherit;
+color: #f0f0f0; transition: background 0.15s;
+}
+.day-card:active { background: #212138; }
+
+.day-icon {
+width: 48px; height: 48px; border-radius: 12px;
+display: flex; align-items: center; justify-content: center;
+font-size: 22px; flex-shrink: 0;
+}
+.day-label { font-size: 11px; letter-spacing: 2px; margin-bottom: 2px; }
+.day-name { font-size: 16px; font-weight: bold; }
+.day-count { font-size: 11px; color: #666; margin-top: 2px; }
+.day-arrow { margin-left: auto; color: #444; font-size: 18px; }
+
+.hist-btn {
+width: 100%; background: transparent;
+border: 1px solid #ffffff18; border-radius: 12px;
+padding: 16px 20px; color: #888; font-size: 13px;
+cursor: pointer; margin-top: 8px; font-family: inherit;
+display: flex; align-items: center; gap: 10px;
+transition: background 0.15s;
+}
+.hist-btn:active { background: #1a1a2e; }
+.hist-btn span:last-child { margin-left: auto; }
+
+/* DAY SCREEN */
+.day-header-border { border-bottom-width: 2px; border-bottom-style: solid; }
+
+.date-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.date-row label { font-size: 11px; color: #666; }
+.date-input {
+background: #0f0f1a; border: 1px solid #333;
+border-radius: 6px; color: #f0f0f0; font-size: 12px;
+padding: 5px 8px; font-family: inherit; outline: none;
+}
+
+/* EXERCISE CARD */
+.ex-card {
+background: #1a1a2e; border-radius: 12px;
+padding: 16px; margin-bottom: 12px;
+border: 1px solid #ffffff10;
+}
+.ex-num { font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
+.ex-name { font-size: 14px; font-weight: bold; margin-bottom: 14px; }
+
+.grid-header {
+display: grid; grid-template-columns: 32px 1fr 1fr 1fr;
+gap: 6px; margin-bottom: 6px;
+}
+.grid-header span { font-size: 10px; color: #555; text-align: center; }
+
+.set-row {
+display: grid; grid-template-columns: 32px 1fr 1fr 1fr;
+gap: 6px; margin-bottom: 6px; align-items: center;
+}
+.set-num {
+width: 28px; height: 28px; border-radius: 8px;
+display: flex; align-items: center; justify-content: center;
+font-size: 11px; font-weight: bold;
+}
+.set-input {
+background: #0f0f1a; border: 1px solid #333;
+border-radius: 8px; color: #f0f0f0; font-size: 14px;
+padding: 8px 4px; text-align: center;
+font-family: inherit; width: 100%; outline: none;
+transition: border 0.15s;
+}
+.set-input:focus { border-color: #ffffff44; }
+
+.save-btn {
+width: 100%; border: none; border-radius: 12px;
+padding: 16px; color: #fff; font-size: 15px;
+font-weight: bold; cursor: pointer; margin-top: 8px;
+font-family: inherit; letter-spacing: 1px;
+transition: background 0.3s, transform 0.1s;
+}
+.save-btn:active { transform: scale(0.98); }
+
+/* HISTORY */
+.tabs { display: flex; gap: 8px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
+.tab-btn {
+border-radius: 8px; padding: 6px 14px;
+font-size: 12px; cursor: pointer; white-space: nowrap;
+font-family: inherit; border: 1px solid;
+transition: all 0.15s;
+}
+
+.hist-card {
+background: #1a1a2e; border-radius: 12px;
+padding: 16px; margin-bottom: 12px;
+border-left: 4px solid; border-top: 1px solid #ffffff10;
+border-right: 1px solid #ffffff10; border-bottom: 1px solid #ffffff10;
+}
+.hist-card-header {
+display: flex; justify-content: space-between;
+align-items: center; margin-bottom: 12px;
+}
+.hist-date { font-size: 13px; font-weight: bold; }
+.hist-day-label { font-size: 10px; letter-spacing: 2px; }
+
+.ex-hist { margin-bottom: 10px; }
+.ex-hist-name { font-size: 11px; color: #888; margin-bottom: 4px; }
+.sets-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.set-badge {
+border-radius: 6px; padding: 4px 10px;
+font-size: 11px; color: #ccc;
+border: 1px solid;
+}
+
+.empty-state {
+text-align: center; color: #444;
+padding: 48px 16px; font-size: 14px;
+}
+.empty-icon { font-size: 32px; margin-top: 12px; display: block; }
+
+.content { padding: 20px 16px 16px; }
+
+/* TOAST */
+.toast {
+position: fixed; bottom: 24px; left: 50%;
+transform: translateX(-50%) translateY(80px);
+background: #2ecc71; color: #fff;
+padding: 12px 28px; border-radius: 24px;
+font-size: 14px; font-weight: bold;
+font-family: ‘Courier New’, monospace;
+transition: transform 0.3s; z-index: 100;
+pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+
+</head>
+<body>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast">✓ GUARDADO</div>
+
+<!-- HOME -->
+
+<div class="screen active" id="screen-home">
+  <div class="header">
+    <div class="header-label">REGISTRO DE ENTRENO</div>
+    <div class="header-title">¿Qué día<br>entrenás hoy?</div>
+    <div class="header-sub" id="home-date"></div>
+  </div>
+  <div class="content">
+    <button class="day-card" onclick="openDay('pecho')" style="border-left: 4px solid #e94560;">
+      <div class="day-icon" style="background:#e9456022;">💪</div>
+      <div>
+        <div class="day-label" style="color:#e94560;">DÍA 1</div>
+        <div class="day-name">Pecho + Tríceps</div>
+        <div class="day-count">5 ejercicios</div>
+      </div>
+      <div class="day-arrow">›</div>
+    </button>
+    <button class="day-card" onclick="openDay('espalda')" style="border-left: 4px solid #3498db;">
+      <div class="day-icon" style="background:#3498db22;">🏋️</div>
+      <div>
+        <div class="day-label" style="color:#3498db;">DÍA 2</div>
+        <div class="day-name">Espalda + Bíceps</div>
+        <div class="day-count">5 ejercicios</div>
+      </div>
+      <div class="day-arrow">›</div>
+    </button>
+    <button class="day-card" onclick="openDay('piernas')" style="border-left: 4px solid #2ecc71;">
+      <div class="day-icon" style="background:#2ecc7122;">🦵</div>
+      <div>
+        <div class="day-label" style="color:#2ecc71;">DÍA 3</div>
+        <div class="day-name">Piernas + Abdomen</div>
+        <div class="day-count">7 ejercicios</div>
+      </div>
+      <div class="day-arrow">›</div>
+    </button>
+    <button class="hist-btn" onclick="openHistory()">
+      <span>📊</span>
+      Ver historial de entrenamientos
+      <span>›</span>
+    </button>
+  </div>
+</div>
+
+<!-- DAY SCREEN -->
+
+<div class="screen" id="screen-day">
+  <div class="header day-header-border" id="day-header">
+    <button class="back-btn" onclick="goHome()">‹ Volver</button>
+    <div class="header-label" id="day-label-top"></div>
+    <div class="header-title" id="day-title-top"></div>
+    <div class="date-row">
+      <label>Fecha:</label>
+      <input type="date" class="date-input" id="session-date" onchange="onDateChange()">
+    </div>
+  </div>
+  <div class="content" id="exercises-container"></div>
+</div>
+
+<!-- HISTORY -->
+
+<div class="screen" id="screen-history">
+  <div class="header">
+    <button class="back-btn" onclick="goHome()">‹ Volver</button>
+    <div class="header-label">HISTORIAL</div>
+    <div class="header-title">📊 Mis entrenamientos</div>
+    <div class="tabs" id="hist-tabs"></div>
+  </div>
+  <div class="content" id="hist-content"></div>
+</div>
+
+<script>
+const DAYS = {
+  pecho: {
+    label: "Día 1", name: "Pecho + Tríceps", emoji: "💪", color: "#e94560",
+    exercises: [
+      "Press plano con mancuernas",
+      "Aperturas en banco plano",
+      "Press inclinado con mancuernas",
+      "Fondos en banco",
+      "Extensión de tríceps"
+    ]
+  },
+  espalda: {
+    label: "Día 2", name: "Espalda + Bíceps", emoji: "🏋️", color: "#3498db",
+    exercises: [
+      "Dominadas (agarre prono)",
+      "Remo con mancuerna",
+      "Dominadas (agarre supino)",
+      "Curl de bíceps",
+      "Curl martillo"
+    ]
+  },
+  piernas: {
+    label: "Día 3", name: "Piernas + Abdomen", emoji: "🦵", color: "#2ecc71",
+    exercises: [
+      "Sentadilla con mancuernas",
+      "Estocadas",
+      "Peso muerto rumano",
+      "Elevación de talones",
+      "Plancha",
+      "Abdominales",
+      "Elevación de piernas"
+    ]
+  }
+};
+
+const SETS = 3;
+let currentDay = null;
+let currentDate = todayStr();
+let histDay = 'pecho';
+
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+function formatDate(s) {
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+function getKey(dayId, date) {
+  return `workout_${dayId}_${date}`;
+}
+function loadAll() {
+  try { return JSON.parse(localStorage.getItem('workout_all') || '{}'); } catch { return {}; }
+}
+function saveAll(data) {
+  localStorage.setItem('workout_all', JSON.stringify(data));
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() { showScreen('home'); }
+
+// Init home date
+document.getElementById('home-date').textContent = formatDate(todayStr());
+
+function openDay(dayId) {
+  currentDay = dayId;
+  currentDate = todayStr();
+  const day = DAYS[dayId];
+
+  // Header
+  document.getElementById('day-header').style.borderBottomColor = day.color + '66';
+  document.getElementById('day-label-top').textContent = day.label.toUpperCase();
+  document.getElementById('day-label-top').style.color = day.color;
+  document.getElementById('day-title-top').textContent = day.emoji + ' ' + day.name;
+  document.getElementById('session-date').value = currentDate;
+
+  renderExercises();
+  showScreen('day');
+}
+
+function onDateChange() {
+  currentDate = document.getElementById('session-date').value;
+  renderExercises();
+}
+
+function renderExercises() {
+  const day = DAYS[currentDay];
+  const data = loadAll();
+  const key = getKey(currentDay, currentDate);
+  const session = data[key] || {};
+  const container = document.getElementById('exercises-container');
+
+  let html = '';
+  day.exercises.forEach((ex, exIdx) => {
+    html += `
+    <div class="ex-card" style="border-color:${day.color}22">
+      <div class="ex-num" style="color:${day.color}">EJERCICIO ${exIdx+1}</div>
+      <div class="ex-name">${ex}</div>
+      <div class="grid-header">
+        <span></span><span>KG</span><span>SERIES</span><span>REPS</span>
+      </div>`;
+    for (let s = 0; s < SETS; s++) {
+      const kg = session[exIdx]?.[s]?.kg ?? '';
+      const series = session[exIdx]?.[s]?.series ?? '';
+      const reps = session[exIdx]?.[s]?.reps ?? '';
+      const filled = kg || series || reps;
+      html += `
+      <div class="set-row">
+        <div class="set-num" style="background:${day.color}22;color:${day.color}">${s+1}</div>
+        <input class="set-input" type="number" min="0" placeholder="0"
+          style="border-color:${filled ? day.color+'55' : '#333'}"
+          value="${kg}" oninput="saveVal(${exIdx},${s},'kg',this.value)"
+          inputmode="decimal">
+        <input class="set-input" type="number" min="0" placeholder="3"
+          style="border-color:${filled ? day.color+'55' : '#333'}"
+          value="${series}" oninput="saveVal(${exIdx},${s},'series',this.value)"
+          inputmode="numeric">
+        <input class="set-input" type="number" min="0" placeholder="10"
+          style="border-color:${filled ? day.color+'55' : '#333'}"
+          value="${reps}" oninput="saveVal(${exIdx},${s},'reps',this.value)"
+          inputmode="numeric">
+      </div>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `<button class="save-btn" id="save-btn"
+    style="background:${day.color}"
+    onclick="saveSession()">GUARDAR ENTRENO</button>`;
+
+  container.innerHTML = html;
+}
+
+function saveVal(exIdx, setIdx, field, val) {
+  const data = loadAll();
+  const key = getKey(currentDay, currentDate);
+  if (!data[key]) data[key] = {};
+  if (!data[key][exIdx]) data[key][exIdx] = {};
+  if (!data[key][exIdx][setIdx]) data[key][exIdx][setIdx] = {};
+  data[key][exIdx][setIdx][field] = val;
+  saveAll(data);
+}
+
+function saveSession() {
+  const btn = document.getElementById('save-btn');
+  const day = DAYS[currentDay];
+  btn.style.background = '#2ecc71';
+  btn.textContent = '✓ GUARDADO';
+  showToast();
+  setTimeout(() => {
+    btn.style.background = day.color;
+    btn.textContent = 'GUARDAR ENTRENO';
+  }, 2000);
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// HISTORY
+function openHistory() {
+  renderHistTabs();
+  renderHistContent();
+  showScreen('history');
+}
+
+function renderHistTabs() {
+  const tabs = document.getElementById('hist-tabs');
+  tabs.innerHTML = Object.entries(DAYS).map(([id, day]) => `
+    <button class="tab-btn"
+      style="background:${histDay===id ? day.color : '#0f0f1a'};
+             border-color:${day.color}55;
+             color:${histDay===id ? '#fff' : day.color}"
+      onclick="setHistDay('${id}')">
+      ${day.emoji} ${day.label}
+    </button>`).join('');
+}
+
+function setHistDay(id) {
+  histDay = id;
+  renderHistTabs();
+  renderHistContent();
+}
+
+function renderHistContent() {
+  const day = DAYS[histDay];
+  const data = loadAll();
+  const prefix = `workout_${histDay}_`;
+  const sessions = Object.keys(data)
+    .filter(k => k.startsWith(prefix))
+    .map(k => ({ date: k.replace(prefix,''), session: data[k] }))
+    .sort((a,b) => b.date.localeCompare(a.date));
+
+  const container = document.getElementById('hist-content');
+
+  if (sessions.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        Todavía no hay entrenamientos registrados
+        <span class="empty-icon">🏋️</span>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  sessions.forEach(({ date, session }) => {
+    html += `
+    <div class="hist-card" style="border-left-color:${day.color}">
+      <div class="hist-card-header">
+        <div class="hist-date">${formatDate(date)}</div>
+        <div class="hist-day-label" style="color:${day.color}">${day.name.toUpperCase()}</div>
+      </div>`;
+
+    day.exercises.forEach((ex, exIdx) => {
+      const exData = session[exIdx];
+      if (!exData || Object.keys(exData).length === 0) return;
+      html += `<div class="ex-hist">
+        <div class="ex-hist-name">${ex}</div>
+        <div class="sets-row">`;
+      Object.entries(exData).forEach(([sIdx, vals]) => {
+        const kg = vals.kg || '–';
+        const ser = vals.series || '–';
+        const rep = vals.reps || '–';
+        html += `<div class="set-badge"
+          style="background:${day.color}18;border-color:${day.color}33">
+          S${parseInt(sIdx)+1}: ${kg}kg · ${ser}x${rep}
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+</script>
+
+</body>
+</html>
